@@ -20,9 +20,6 @@ class Solution {
 
         ApplePickingInfo aliceWhenFirst = getApplePickingInfo(A, K, -1, 0);
         ApplePickingInfo bobWhenSecond = getApplePickingInfo(A, L, aliceWhenFirst.start, K);
-        if (bobWhenSecond.appleCount == -1) {
-            return -1;
-        }
 
         ApplePickingInfo bobWhenFirst = getApplePickingInfo(A, L, -1, 0);
         ApplePickingInfo aliceWhenSecond = getApplePickingInfo(A, K, bobWhenFirst.start, L);
@@ -31,30 +28,47 @@ class Solution {
     }
 
     private ApplePickingInfo getApplePickingInfo(int[] a, int numberToPick, int ignoreRangeStart, int ignoreRangeLen) {
-        int max = 0;
-        int start = 0;
-
         int i = 0;
-        if (numberToPick >= ignoreRangeStart + 1) {
+        int sum = 0;
+        int start = 0;
+        if (numberToPick > ignoreRangeStart) {
             i = ignoreRangeStart + ignoreRangeLen;
-            if (i + numberToPick > a.length) {
-                return new ApplePickingInfo(-1, -1);
-            }
+            start = i;
         }
+        // calculate the first sum
+        int j = 0;
+        while (j < numberToPick) {
+            sum += a[i];
+            i++;
+            j++;
+        }
+        int max = sum;
 
+        // calculate other sums
         for (; i <= a.length - numberToPick; i++) {
-            if (i == ignoreRangeStart) {
+            if (ignoreRangeStart != -1 && ignoreRangeStart - i < numberToPick) {
                 i = ignoreRangeStart + ignoreRangeLen;
+                // calculate the first sum after skipping the range of the other person
+                if (i > a.length - numberToPick) {
+                    // the number of trees left is less than numberToPick.
+                    break;
+                } else {
+                    sum = 0;
+                    j = 0;
+                    while (j < numberToPick) {
+                        sum += a[i];
+                        i++;
+                        j++;
+                    }
+                    continue;
+                }
             }
-            int sum = 0;
-            int j = i;
-            while (j < i + numberToPick) {
-                sum += a[j];
-                j++;
-            }
+
+            sum -= a[i - numberToPick];
+            sum += a[i];
             if (sum > max) {
                 max = sum;
-                start = i;
+                start = i - numberToPick + 1;
             }
         }
 
